@@ -1,0 +1,13 @@
+## Simplistic image to get started
+
+# docker image build -t springboot-rest-endpoint -f Dockerfile.monolithic .
+# docker run -p 5000:8080 --env SPRING_APPLICATION_JSON='{"app1":{"prop1":"true"}}' springboot-rest-endpoint
+
+#FROM amazoncorretto:11
+FROM openjdk:8-jdk-alpine
+
+COPY target/springboot-rest-endpoint-0.0.1-SNAPSHOT.jar /app/app.jar
+
+ENTRYPOINT ["java","-jar", "/app/app.jar"]
+
+EXPOSE 8080

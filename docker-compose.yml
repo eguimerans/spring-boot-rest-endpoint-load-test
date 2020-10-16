@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  rest:
+    image: "springboot-rest-endpoint:latest"
+    hostname: rest
+#    container_name: rest
+    environment:
+      PGUSER: username
+      PGPASSWORD: password
+      # ... other environment variables
+    expose:
+      - "8080"
+
+  nginx:
+    container_name: reverse
+    hostname: reverse
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - rest
+    ports:
+      - "4000:4000"
+
+
