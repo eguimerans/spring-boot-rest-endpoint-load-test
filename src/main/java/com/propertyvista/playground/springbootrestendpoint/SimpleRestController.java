@@ -19,7 +19,10 @@
  */
 package com.propertyvista.playground.springbootrestendpoint;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +30,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
 
 @RestController
 public class SimpleRestController {
@@ -38,22 +45,29 @@ public class SimpleRestController {
 
     private static final String template = "echo, %s!";
 
-//    private final AtomicLong counter = new AtomicLong();
+    @RequestMapping("/")
+    public void swaggerRedirect(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/swagger-ui.html?docExpansion=list");
+    }
 
-    @GetMapping("/")
+    @GetMapping("/status")
+    @ApiResponse(code = 200, message = "this is message")
+    @ApiOperation(code = 200, value = "overall status", notes = "overall status")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> status() {
         return ResponseEntity.ok(String.format("%s - Status OK", LocalDateTime.now()));
     }
 
     @GetMapping("/echo")
+    @ApiOperation(code = 200, value = "single echo", notes = "single echo")
     public String echo(@RequestParam(value = "value", defaultValue = "empty echo <param 'value' is available>") String value) {
         log.info("echo for {}", value);
         return String.format(template, value);
     }
 
     @GetMapping("/timeConsumingOperation")
-    public ResponseEntity<String> timeConsumingOperation(@RequestParam(value = "value", defaultValue = "100") Integer value) {
+    @ApiOperation(code = 200, value = "simulate time consuming operation", notes = "simulate time consuming by sleeping thread for amount of time (default 100ms)")
+    public ResponseEntity<String> timeConsuming(@RequestParam(value = "value", defaultValue = "100") Integer value) {
         StopWatch watch = new StopWatch();
         watch.start();
         try {
@@ -79,8 +93,9 @@ public class SimpleRestController {
         return ResponseEntity.ok(message);
     }
 
-    @GetMapping("/primes")
-    public ResponseEntity<String> primes(@RequestParam(value = "value", defaultValue = "100") Integer value) {
+    @GetMapping(path = "/primes", name = "this is the name")
+    @ApiOperation(code = 200, value = "calculate number of primes", notes = "calculate number of prime numbers less than supplied value; if no value supplied, value is 100")
+    public ResponseEntity<String> calculatePrimes(@RequestParam(value = "value", defaultValue = "100") Integer value) {
         StopWatch watch = new StopWatch();
         watch.start();
         int primesFound = 0;
